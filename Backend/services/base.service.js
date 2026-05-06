@@ -78,10 +78,6 @@ const deleteFeatureById = (featureId) => {
     if (featureIndex === -1) {
         return { error: 'Feature not found' };
     }
-    // const relatedTestcases = getTestcasesByFeatureId(featureId);
-    // relatedTestcases.forEach(tc => {
-    //     deleteTestcaseById(featureId, tc.id);
-    // });
     features.splice(featureIndex, 1);
     return { message: 'Feature deleted successfully' };
 }
