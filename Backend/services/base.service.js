@@ -11,7 +11,6 @@ const getBaseResponse = () => {
 let idCount = 1;
 let testIdCount = 1;
 const features = [];
-const testcases = [];
 
 const featureResponse = (title) => {
     if (!title) {
@@ -20,7 +19,8 @@ const featureResponse = (title) => {
 
     const response ={
         id: idCount++,
-        name: title
+        name: title,
+        testcases: []
     }
 
     features.push(response);
@@ -49,42 +49,47 @@ const testcaseResponse = (featureId, title, type, tag) => {
         tag
     }
 
-    testcases.push(response);
+    const tcFeature = features.find(f => f.id === Number(featureId));
+    if (tcFeature) {
+        tcFeature.testcases.push(response);
+    }else {
+        throw new Error('Feature not found for the given featureId');
+    }
     return response;
 }
 
 const getTestcasesByFeatureId = (featureId) => {
-    const testcase = testcases.filter(t => t.featureId === Number(featureId));
-    return testcase;
+    const relatedTestcases = features.find(f => f.id === Number(featureId))?.testcases || "Testcases not found for this feature";
+    return relatedTestcases;
 }
 
 const deleteTestcaseById = (featureId, testcaseId) => {
-    const testcaseIndex = testcases.findIndex(t => t.featureId === Number(featureId) && t.id === Number(testcaseId));
+    const tcFeature = features.find(f => f.id === Number(featureId));
+    const testcaseIndex = tcFeature.testcases.findIndex(t => t.id === Number(testcaseId));
     if (testcaseIndex === -1) {
         return { error: 'Testcase not found' };
     }
-    testcases.splice(testcaseIndex, 1);
+    tcFeature.testcases.splice(testcaseIndex, 1);
     return { message: 'Testcase deleted successfully' };
 }
 
 const deleteFeatureById = (featureId) => {
-    const testcases = getTestcasesByFeatureId(featureId);
-    testcases.forEach(tc => {
-        deleteTestcaseById(featureId, tc.id);
-    });
     const featureIndex = features.findIndex(f => f.id === Number(featureId));
     if (featureIndex === -1) {
         return { error: 'Feature not found' };
     }
+    // const relatedTestcases = getTestcasesByFeatureId(featureId);
+    // relatedTestcases.forEach(tc => {
+    //     deleteTestcaseById(featureId, tc.id);
+    // });
     features.splice(featureIndex, 1);
     return { message: 'Feature deleted successfully' };
 }
 
 const missingTypesResponse = (featureId) => {
-    const testcases = getTestcasesByFeatureId(featureId);
-    const existingTypes = new Set(testcases.map(t => t.type.toLowerCase()));
+    const relatedTestcases = getTestcasesByFeatureId(featureId);
+    const existingTypes = new Set(relatedTestcases.map(t => t.type.toLowerCase()));
     const missingTypes = REQUIRED_TYPES.filter(type => !existingTypes.has(type.toLowerCase()));
-    console.log(missingTypes);
     const response = {
         featureId,
         featureName: features.find(f => f.id === Number(featureId))?.name || 'unknown',
