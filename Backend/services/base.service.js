@@ -59,7 +59,7 @@ const testcaseResponse = (featureId, title, type, tags) => {
 
 const getTestcasesByFeatureId = (featureId) => {
     const relatedTestcases = testcases.filter(t => t.featureId === Number(featureId));
-    return relatedTestcases;
+    return relatedTestcases? relatedTestcases : { error: 'Feature not found or no testcases for this feature' };
 }
 
 const deleteTestcaseById = (featureId, testcaseId) => {
